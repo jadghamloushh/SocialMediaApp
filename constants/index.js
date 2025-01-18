@@ -1,0 +1,4 @@
+export const supabaseUrl = "https://isxvllkrctzdrryrekub.supabase.co";
+
+export const supabaseAnonKey =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlzeHZsbGtyY3R6ZHJyeXJla3ViIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzcyMTk3MTEsImV4cCI6MjA1Mjc5NTcxMX0.rrCT0SHU-lGiBIwCu5rwQBq9udutGSbPHn_El7DAUcY";
