@@ -18,7 +18,7 @@ import Input from "../components/Input";
 import { useRef } from "react";
 import { useState } from "react";
 import Button from "../components/Button";
-import { SceneStyleInterpolators } from "@react-navigation/bottom-tabs";
+import { supabase } from "../lib/supabase";
 
 const Login = () => {
   const router = useRouter();
@@ -29,11 +29,24 @@ const Login = () => {
 
   const [loading, setLoading] = useState(false);
 
-  const onSubmit = (async) => {
+  const onSubmit = async () => {
     if (!emailRef.current && !passwordRef.current) {
       Alert.alert("Error", "Please fill al the fields!");
       return;
     }
+    // login functionality
+    let email = emailRef.current.trim();
+    let password = passwordRef.current.trim();
+
+    setLoading(true);
+    const { error } = await supabase.auth.signInWithPassword({
+      email: email,
+      password: password,
+    });
+
+    setLoading(false);
+
+    if (error) Alert.alert(error.message);
   };
 
   return (
@@ -124,5 +137,18 @@ const styles = StyleSheet.create({
     textAlign: "center",
     color: theme.colors.text,
     fontSize: hp(1.6),
+  },
+  googleButtonContainer: {
+    backgroundColor: theme.colors.primary,
+    height: hp(6.6),
+    justifyContent: "center",
+    alignItems: "center",
+    borderCurve: "continuous",
+    borderRadius: theme.radius.xl,
+  },
+  text: {
+    fontSize: hp(2.5),
+    color: "white",
+    fontWeight: theme.fonts.bold,
   },
 });
