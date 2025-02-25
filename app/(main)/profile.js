@@ -16,10 +16,9 @@ import { theme } from "../../constants/theme";
 import { Alert, Button } from "react-native";
 import { supabase } from "../../lib/supabase";
 import Avatar from "../../components/Avatar";
-import { SceneStyleInterpolators } from "@react-navigation/bottom-tabs";
 
 const Profile = () => {
-  const { user, setAuth } = useAuth();
+  const { user } = useAuth();
   const router = useRouter();
 
   const onLogout = async () => {
@@ -34,7 +33,7 @@ const Profile = () => {
     Alert.alert("Confirm", " Are you sure you want to log out?", [
       {
         text: "Cancel",
-        onPress: () => console.log("Logout Cancelled"),
+        onPress: () => console.log("Loout Cancelled"),
         style: "cancel",
       },
       {
@@ -53,6 +52,7 @@ const Profile = () => {
 };
 
 const UserHeader = ({ user, router, handleLogout }) => {
+  //console.log("User Metadata:", user);
   return (
     <View
       style={{ flex: 1, backgroundColor: "white", paddingHorizontal: wp(4) }}
@@ -82,12 +82,8 @@ const UserHeader = ({ user, router, handleLogout }) => {
 
           {/* username and address of the user */}
           <View style={{ alignItems: "center", gap: 4 }}>
-            <Text style={styles.userName}>
-              {user && user?.user_metadata?.name}
-            </Text>
-            <Text style={styles.infoText}>
-              {user && user?.user_metadata?.address}
-            </Text>
+            <Text style={styles.userName}>{user && user.name}</Text>
+            <Text style={styles.infoText}>{user && user.address}</Text>
           </View>
 
           {/* email, phone and bio */}
@@ -96,15 +92,14 @@ const UserHeader = ({ user, router, handleLogout }) => {
               <Icon name="mail" size={20} color={theme.colors.textLight} />
               <Text style={styles.infoText}>{user && user.email}</Text>
             </View>
-            {user && user.phoneNumber && (
+            {user.phoneNumber && (
               <View style={styles.info}>
                 <Icon name="call" size={20} color={theme.colors.textLight} />
-                <Text style={styles.infoText}>{user && user.phoneNumber}</Text>
+                <Text style={styles.infoText}>{user.phoneNumber}</Text>
               </View>
             )}
-            {user && user.bio && (
-              <Text style={styles.infoText}>{user.bio} </Text>
-            )}
+
+            {user.bio && <Text style={styles.infoText}>{user?.bio}</Text>}
           </View>
         </View>
       </View>
@@ -157,7 +152,7 @@ const styles = StyleSheet.create({
   infoText: {
     fontSize: hp(1.6),
     fontWeight: "500",
-    colors: theme.colors.textLight,
+    color: theme.colors.textLight,
   },
   logoutButton: {
     position: "absolute",

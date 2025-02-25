@@ -6,12 +6,19 @@ import ScreenWrapper from "../../components/ScreenWrapper";
 import Header from "../../components/Header";
 import { Image } from "expo-image";
 import { useAuth } from "../../context/AuthContext";
-import { getUserImageSrc } from "../../services/imageService";
+import { getUserImageSrc, uploadFile } from "../../services/imageService";
 import Icon from "../../assets/icons";
-import { Input } from "@rneui/themed/dist/Input";
+import Input from "../../components/Input";
+import Button from "../../components/Button";
+import { updateUser } from "../../services/userService";
+import { Alert } from "react-native";
+import { useRouter } from "expo-router";
+import * as ImagePicker from "expo-image-picker";
 
 const EditProfile = () => {
-  const { user: currentUser } = useAuth();
+  const { user: currentUser, setUserData } = useAuth();
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
   const [user, setUser] = useState({
     name: "",
@@ -33,9 +40,48 @@ const EditProfile = () => {
     }
   }, [currentUser]);
 
-  let imageSource = getUserImageSrc(user.image);
+  let imageSource =
+    user.image && typeof user.image == "object"
+      ? user.image.uri
+      : getUserImageSrc(user.image);
 
-  const onPickImage = async () => {};
+  const onPickImage = async () => {
+    let res = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 0.7,
+    });
+
+    if (!res.canceled) {
+      setUser({ ...user, image: res.assets[0] });
+    }
+  };
+
+  const onSubmit = async () => {
+    //console.log("pressed");
+    let userData = { ...user };
+    let { name, phoneNumber, address, image, bio } = userData;
+    if (!name || !phoneNumber || !address || !bio || !image) {
+      Alert.alert("Profile", "Please fill all the fields");
+      return;
+    }
+    setLoading(true);
+
+    if (typeof image == "object") {
+      let imageRes = await uploadFile("profiles", image?.uri, true);
+      if (imageRes.success) userData.image = imageRes.data;
+      else userData.image = null;
+    }
+
+    const res = await updateUser(currentUser?.id, userData);
+    setLoading(false);
+
+    if (res.success) {
+      setUserData({ ...currentUser, ...userData });
+      router.back();
+    }
+  };
 
   return (
     <ScreenWrapper bg="white">
@@ -52,16 +98,46 @@ const EditProfile = () => {
               </Pressable>
             </View>
             <Text style={{ fontSize: hp(1.5), color: theme.colors.text }}>
-              Please fill all your profile details
+              Edit your profile details
             </Text>
             <Input
               icon={<Icon name="user" />}
               placeholder="Enter your name"
               value={user.name}
-              onChange={(value) => {
+              onChangeText={(value) => {
                 setUser({ ...user, name: value });
               }}
             />
+
+            <Input
+              icon={<Icon name="call" />}
+              placeholder="Enter your phone number"
+              value={user.phoneNumber}
+              onChangeText={(value) => {
+                setUser({ ...user, phoneNumber: value });
+              }}
+            />
+
+            <Input
+              icon={<Icon name="location" />}
+              placeholder="Enter your address"
+              value={user.address}
+              onChangeText={(value) => {
+                setUser({ ...user, address: value });
+              }}
+            />
+
+            <Input
+              placeholder="Enter your bio"
+              value={user.bio}
+              multiline={true}
+              containerStyle={styles.bio}
+              onChangeText={(value) => {
+                setUser({ ...user, bio: value });
+              }}
+            />
+
+            <Button title="Update" loading={loading} onPress={onSubmit} />
           </View>
         </ScrollView>
       </View>
@@ -101,6 +177,10 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.4,
     shadowRadius: 5,
     elevation: 7,
+  },
+  form: {
+    gap: 18,
+    marginTop: 20,
   },
   input: {
     flexDirection: "row",
