@@ -1,5 +1,5 @@
 import { Alert, Pressable, StyleSheet, Text, View } from "react-native";
-import React from "react";
+import React, { useState, useEffect } from "react";
 import ScreenWrapper from "../../components/ScreenWrapper";
 import Button from "../../components/Button";
 import { useAuth } from "../../context/AuthContext";
@@ -9,10 +9,26 @@ import { theme } from "../../constants/theme";
 import { wp, hp } from "../../helpers/common";
 import Icon from "../../assets/icons";
 import Avatar from "../../components/Avatar";
+import { fetchPosts } from "../../services/postService";
 
 const Home = () => {
   const { user, setAuth } = useAuth();
   const router = useRouter();
+
+  const [posts, setPosts] = useState();
+
+  useEffect(() => {
+    getPosts();
+  }, []);
+
+  const getPosts = async () => {
+    // call api here
+    let res = await fetchPosts();
+
+    if (res.success) {
+      setPosts(res.data);
+    }
+  };
 
   const onLogout = async () => {
     //setAuth(null);
